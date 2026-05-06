@@ -19,7 +19,7 @@ namespace EventEase.Controllers
             _context = context;
         }
 
-        // GET: Bookings (SEARCH ENABLED)
+        // GET: Bookings
         public async Task<IActionResult> Index(string searchString)
         {
             var bookings = _context.Bookings
@@ -30,16 +30,15 @@ namespace EventEase.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 bookings = bookings.Where(b =>
-                    b.BookingId.ToString().Contains(searchString) ||
-                    (b.Event != null && b.Event.EventName.Contains(searchString)) ||
-                    (b.Venue != null && b.Venue.Name.Contains(searchString))
+                    b.Venue.Name.Contains(searchString) ||
+                    b.Event.EventName.Contains(searchString)
                 );
             }
 
             return View(await bookings.ToListAsync());
         }
 
-        // GET: Bookings/Details/5
+        // GET: Details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -54,7 +53,7 @@ namespace EventEase.Controllers
             return View(booking);
         }
 
-        // GET: Bookings/Create
+        // GET: Create
         public IActionResult Create()
         {
             ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName");
@@ -62,7 +61,7 @@ namespace EventEase.Controllers
             return View();
         }
 
-        // POST: Bookings/Create
+        // POST: Create (WITH DOUBLE BOOKING PREVENTION)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BookingId,VenueId,EventId,BookingDate")] Booking booking)
@@ -75,19 +74,30 @@ namespace EventEase.Controllers
                 return View(booking);
             }
 
+            // 🚫 Prevent double booking
+            bool alreadyBooked = await _context.Bookings.AnyAsync(b =>
+                b.VenueId == booking.VenueId &&
+                b.BookingDate.Date == booking.BookingDate.Date
+            );
+
+            if (alreadyBooked)
+            {
+                ModelState.AddModelError("", "This venue is already booked on the selected date.");
+                return View(booking);
+            }
+
             _context.Add(booking);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Bookings/Edit/5
+        // GET: Edit
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
             var booking = await _context.Bookings.FindAsync(id);
-
             if (booking == null) return NotFound();
 
             ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.EventId);
@@ -96,7 +106,7 @@ namespace EventEase.Controllers
             return View(booking);
         }
 
-        // POST: Bookings/Edit/5
+        // POST: Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("BookingId,VenueId,EventId,BookingDate")] Booking booking)
@@ -121,13 +131,10 @@ namespace EventEase.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.EventId);
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "Name", booking.VenueId);
-
             return View(booking);
         }
 
-        // GET: Bookings/Delete/5
+        // GET: Delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -142,7 +149,7 @@ namespace EventEase.Controllers
             return View(booking);
         }
 
-        // POST: Bookings/Delete/5
+        // POST: Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
