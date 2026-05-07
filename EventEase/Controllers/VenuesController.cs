@@ -30,12 +30,14 @@ namespace EventEase.Controllers
         // GET: Details
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
             var venue = await _context.Venues
                 .FirstOrDefaultAsync(m => m.VenueId == id);
 
-            if (venue == null) return NotFound();
+            if (venue == null)
+                return NotFound();
 
             return View(venue);
         }
@@ -46,7 +48,7 @@ namespace EventEase.Controllers
             return View();
         }
 
-        // POST: Create (WITH AZURITE UPLOAD FIXED)
+        // POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Venue venue, IFormFile imageFile)
@@ -56,7 +58,9 @@ namespace EventEase.Controllers
                 // 🖼 Upload image to Azurite
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    var imageUrl = await _blobService.UploadFileAsync(imageFile, "venue-images");
+                    var imageUrl = await _blobService
+                        .UploadFileAsync(imageFile, "venue-images");
+
                     venue.ImageUrl = imageUrl;
                 }
 
@@ -72,10 +76,13 @@ namespace EventEase.Controllers
         // GET: Edit
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
             var venue = await _context.Venues.FindAsync(id);
-            if (venue == null) return NotFound();
+
+            if (venue == null)
+                return NotFound();
 
             return View(venue);
         }
@@ -85,7 +92,8 @@ namespace EventEase.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Venue venue)
         {
-            if (id != venue.VenueId) return NotFound();
+            if (id != venue.VenueId)
+                return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -111,12 +119,14 @@ namespace EventEase.Controllers
         // GET: Delete
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
             var venue = await _context.Venues
                 .FirstOrDefaultAsync(m => m.VenueId == id);
 
-            if (venue == null) return NotFound();
+            if (venue == null)
+                return NotFound();
 
             return View(venue);
         }
@@ -127,6 +137,18 @@ namespace EventEase.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var venue = await _context.Venues.FindAsync(id);
+
+            // 🚫 Prevent deleting booked venues
+            bool hasBookings = await _context.Bookings
+                .AnyAsync(b => b.VenueId == id);
+
+            if (hasBookings)
+            {
+                TempData["ErrorMessage"] =
+                    "This venue cannot be deleted because it has active bookings.";
+
+                return RedirectToAction(nameof(Index));
+            }
 
             if (venue != null)
             {

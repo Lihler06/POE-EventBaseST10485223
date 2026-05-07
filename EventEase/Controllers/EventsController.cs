@@ -19,36 +19,34 @@ namespace EventEase.Controllers
             _context = context;
         }
 
-        
+        // GET: Events
         public async Task<IActionResult> Index()
         {
             return View(await _context.Events.ToListAsync());
         }
 
-        
+        // GET: Details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.EventId == id);
+
             if (@event == null)
-            {
                 return NotFound();
-            }
 
             return View(@event);
         }
 
+        // GET: Create
         public IActionResult Create()
         {
             return View();
         }
 
-        
+        // POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl")] Event @event)
@@ -57,36 +55,34 @@ namespace EventEase.Controllers
             {
                 _context.Add(@event);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(@event);
         }
 
-        
+        // GET: Edit
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var @event = await _context.Events.FindAsync(id);
+
             if (@event == null)
-            {
                 return NotFound();
-            }
+
             return View(@event);
         }
 
-       
+        // POST: Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl")] Event @event)
         {
             if (id != @event.EventId)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -98,49 +94,57 @@ namespace EventEase.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!EventExists(@event.EventId))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(@event);
         }
 
-        
+        // GET: Delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.EventId == id);
+
             if (@event == null)
-            {
                 return NotFound();
-            }
 
             return View(@event);
         }
 
-       
+        // POST: Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var @event = await _context.Events.FindAsync(id);
+
+            // 🚫 Prevent deleting booked events
+            bool hasBookings = await _context.Bookings
+                .AnyAsync(b => b.EventId == id);
+
+            if (hasBookings)
+            {
+                TempData["ErrorMessage"] =
+                    "This event cannot be deleted because it has active bookings.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
             if (@event != null)
             {
                 _context.Events.Remove(@event);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

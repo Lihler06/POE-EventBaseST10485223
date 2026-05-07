@@ -1,0 +1,51 @@
+@model IEnumerable<EventEase.Models.Booking>
+
+@{
+    ViewData["Title"] = "Booking Report";
+}
+
+<h1 class="mb-4">Booking Report</h1>
+
+<table class="table table-bordered table-striped">
+
+    <thead class="table-dark">
+        <tr>
+            <th>Booking ID</th>
+            <th>Booking Date</th>
+            <th>Venue</th>
+            <th>Location</th>
+            <th>Event</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+@foreach (var item in Model)
+{
+        <tr>
+
+            <td>
+                @item.BookingId
+            </td>
+
+            <td>
+                @item.BookingDate.ToShortDateString()
+            </td>
+
+            <td>
+                @item.Venue.Name
+            </td>
+
+            <td>
+                @item.Venue.Location
+            </td>
+
+            <td>
+                @item.Event.EventName
+            </td>
+
+        </tr>
+}
+
+    </tbody>
+</table>

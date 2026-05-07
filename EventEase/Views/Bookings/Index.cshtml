@@ -6,65 +6,85 @@
 
 <h1>Bookings</h1>
 
-<!-- SEARCH SECTION -->
-<form asp-action="Index" method="get" class="mb-3">
-    <div class="row">
-        <div class="col-md-6">
-            <input type="text"
-                   name="searchString"
-                   class="form-control"
-                   placeholder="Search Booking ID, Event Name, or Venue Name"
-                   value="@Context.Request.Query["searchString"]" />
-        </div>
-
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">Search</button>
-        </div>
-
-        <div class="col-md-2">
-            <a href="@Url.Action("Index", "Bookings")" class="btn btn-secondary">Reset</a>
-        </div>
-    </div>
-</form>
-
-<!-- CREATE BUTTON -->
 <p>
-    <a asp-action="Create" class="btn btn-success">Create New Booking</a>
+    <a asp-action="Create" class="btn btn-primary">
+        Create New
+    </a>
+
+    <a asp-action="Report" class="btn btn-success">
+        View Booking Report
+    </a>
 </p>
 
-<!-- TABLE -->
-<table class="table table-striped">
-    <thead>
+<!-- 🔍 SEARCH + RESET -->
+<form asp-action="Index" method="get" class="mb-3">
+
+    <input type="text"
+           name="searchString"
+           class="form-control"
+           placeholder="Search by Venue or Event..." />
+
+    <br />
+
+    <input type="submit"
+           value="Search"
+           class="btn btn-primary" />
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Reset
+    </a>
+
+</form>
+
+<table class="table table-bordered table-striped">
+
+    <thead class="table-dark">
         <tr>
             <th>Booking Date</th>
             <th>Venue</th>
             <th>Event</th>
-            <th>Actions</th>
+            <th></th>
         </tr>
     </thead>
 
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @item.BookingDate.ToString("yyyy-MM-dd")
-                </td>
 
-                <td>
-                    @item.Venue?.Name
-                </td>
+@foreach (var item in Model)
+{
+        <tr>
 
-                <td>
-                    @item.Event?.EventName
-                </td>
+            <td>
+                @item.BookingDate.ToShortDateString()
+            </td>
 
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.BookingId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.BookingId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.BookingId">Delete</a>
-                </td>
-            </tr>
-        }
+            <td>
+                @item.Venue.Name
+            </td>
+
+            <td>
+                @item.Event.EventName
+            </td>
+
+            <td>
+                <a asp-action="Edit"
+                   asp-route-id="@item.BookingId">
+                    Edit
+                </a> |
+
+                <a asp-action="Details"
+                   asp-route-id="@item.BookingId">
+                    Details
+                </a> |
+
+                <a asp-action="Delete"
+                   asp-route-id="@item.BookingId">
+                    Delete
+                </a>
+            </td>
+
+        </tr>
+}
+
     </tbody>
 </table>
