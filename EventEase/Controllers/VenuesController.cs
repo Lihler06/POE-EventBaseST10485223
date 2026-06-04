@@ -21,13 +21,13 @@ namespace EventEase.Controllers
             _blobService = blobService;
         }
 
-        // GET: Venues
+        // Getting venues for post
         public async Task<IActionResult> Index()
         {
             return View(await _context.Venues.ToListAsync());
         }
 
-        // GET: Details
+        // Getting details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,7 +42,7 @@ namespace EventEase.Controllers
             return View(venue);
         }
 
-        // GET: Create
+        // Get result for create
         public IActionResult Create()
         {
             return View();
@@ -73,7 +73,7 @@ namespace EventEase.Controllers
             return View(venue);
         }
 
-        // GET: Edit
+        // Get delete
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -87,7 +87,7 @@ namespace EventEase.Controllers
             return View(venue);
         }
 
-        // POST: Edit
+        // Deleting post
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Venue venue)
@@ -116,7 +116,7 @@ namespace EventEase.Controllers
             return View(venue);
         }
 
-        // GET: Delete
+        //You Get delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -131,14 +131,14 @@ namespace EventEase.Controllers
             return View(venue);
         }
 
-        // POST: Delete
+        // Deleting post
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var venue = await _context.Venues.FindAsync(id);
 
-            // 🚫 Prevent deleting booked venues
+            // Prevents deleting of bookings
             bool hasBookings = await _context.Bookings
                 .AnyAsync(b => b.VenueId == id);
 

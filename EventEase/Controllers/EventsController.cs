@@ -17,13 +17,13 @@ namespace EventEase.Controllers
             _context = context;
         }
 
-        // GET: Events
+        // Youre getting events
         public async Task<IActionResult> Index()
         {
             return View(await _context.Events.ToListAsync());
         }
 
-        // GET: Details
+        // Youre getting details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -36,7 +36,7 @@ namespace EventEase.Controllers
             return View(@event);
         }
 
-        // GET: Create
+        // get create
         public IActionResult Create()
         {
             ViewData["EventTypeId"] =
@@ -45,12 +45,12 @@ namespace EventEase.Controllers
             return View();
         }
 
-        // POST: Create
+        // creating post
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl,EventTypeId")] Event @event)
         {
-            // 🔥 FIX: remove navigation validation issue
+            // Fixing navigation validation Issue
             ModelState.Remove("EventType");
 
             if (ModelState.IsValid)
@@ -66,7 +66,7 @@ namespace EventEase.Controllers
             return View(@event);
         }
 
-        // GET: Edit
+        // Getting edit
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -81,7 +81,7 @@ namespace EventEase.Controllers
             return View(@event);
         }
 
-        // POST: Edit
+        // post edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl,EventTypeId")] Event @event)
@@ -114,7 +114,7 @@ namespace EventEase.Controllers
             return View(@event);
         }
 
-        // GET: Delete
+        // Get delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -127,7 +127,7 @@ namespace EventEase.Controllers
             return View(@event);
         }
 
-        // POST: Delete
+        // Psot delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
