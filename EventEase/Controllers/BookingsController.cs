@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -19,22 +18,54 @@ namespace EventEase.Controllers
             _context = context;
         }
 
-        // GET: Bookings
-        public async Task<IActionResult> Index(string searchString)
+        // GET: Bookings (WITH FILTERING)
+        public async Task<IActionResult> Index(
+            string searchString,
+            int? eventTypeId,
+            DateTime? startDate,
+            DateTime? endDate)
         {
             var bookings = _context.Bookings
                 .Include(b => b.Event)
+                    .ThenInclude(e => e.EventType)
                 .Include(b => b.Venue)
                 .AsQueryable();
 
-            // 🔍 Search by Venue or Event
+            // 🔍 SEARCH (Venue or Event name)
             if (!string.IsNullOrEmpty(searchString))
             {
                 bookings = bookings.Where(b =>
                     b.Venue.Name.Contains(searchString) ||
-                    b.Event.EventName.Contains(searchString)
-                );
+                    b.Event.EventName.Contains(searchString));
             }
+
+            // 🎭 FILTER BY EVENT TYPE
+            if (eventTypeId.HasValue)
+            {
+                bookings = bookings.Where(b =>
+                    b.Event.EventTypeId == eventTypeId.Value);
+            }
+
+            // 📅 FILTER BY EVENT START DATE
+            if (startDate.HasValue)
+            {
+                bookings = bookings.Where(b =>
+                    b.Event.StartDate.Date >= startDate.Value.Date);
+            }
+
+            // 📅 FILTER BY EVENT END DATE
+            if (endDate.HasValue)
+            {
+                bookings = bookings.Where(b =>
+                    b.Event.EndDate.Date <= endDate.Value.Date);
+            }
+
+            // dropdown for view
+            ViewBag.EventTypes = new SelectList(
+                _context.EventTypes,
+                "EventTypeId",
+                "TypeName"
+            );
 
             return View(await bookings.ToListAsync());
         }

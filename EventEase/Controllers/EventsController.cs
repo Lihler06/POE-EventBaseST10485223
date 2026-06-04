@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -28,14 +26,12 @@ namespace EventEase.Controllers
         // GET: Details
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.EventId == id);
 
-            if (@event == null)
-                return NotFound();
+            if (@event == null) return NotFound();
 
             return View(@event);
         }
@@ -43,21 +39,29 @@ namespace EventEase.Controllers
         // GET: Create
         public IActionResult Create()
         {
+            ViewData["EventTypeId"] =
+                new SelectList(_context.EventTypes, "EventTypeId", "TypeName");
+
             return View();
         }
 
         // POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl")] Event @event)
+        public async Task<IActionResult> Create([Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl,EventTypeId")] Event @event)
         {
+            // 🔥 FIX: remove navigation validation issue
+            ModelState.Remove("EventType");
+
             if (ModelState.IsValid)
             {
                 _context.Add(@event);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["EventTypeId"] =
+                new SelectList(_context.EventTypes, "EventTypeId", "TypeName", @event.EventTypeId);
 
             return View(@event);
         }
@@ -65,13 +69,14 @@ namespace EventEase.Controllers
         // GET: Edit
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var @event = await _context.Events.FindAsync(id);
 
-            if (@event == null)
-                return NotFound();
+            if (@event == null) return NotFound();
+
+            ViewData["EventTypeId"] =
+                new SelectList(_context.EventTypes, "EventTypeId", "TypeName", @event.EventTypeId);
 
             return View(@event);
         }
@@ -79,10 +84,11 @@ namespace EventEase.Controllers
         // POST: Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl")] Event @event)
+        public async Task<IActionResult> Edit(int id, [Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl,EventTypeId")] Event @event)
         {
-            if (id != @event.EventId)
-                return NotFound();
+            if (id != @event.EventId) return NotFound();
+
+            ModelState.Remove("EventType");
 
             if (ModelState.IsValid)
             {
@@ -102,20 +108,21 @@ namespace EventEase.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            ViewData["EventTypeId"] =
+                new SelectList(_context.EventTypes, "EventTypeId", "TypeName", @event.EventTypeId);
+
             return View(@event);
         }
 
         // GET: Delete
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.EventId == id);
 
-            if (@event == null)
-                return NotFound();
+            if (@event == null) return NotFound();
 
             return View(@event);
         }
@@ -127,7 +134,6 @@ namespace EventEase.Controllers
         {
             var @event = await _context.Events.FindAsync(id);
 
-            // 🚫 Prevent deleting booked events
             bool hasBookings = await _context.Bookings
                 .AnyAsync(b => b.EventId == id);
 
