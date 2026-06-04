@@ -13,9 +13,9 @@ namespace EventEase.Models
 
         // Navigation properties (make them OPTIONAL)
         [ForeignKey("VenueId")]
-        public Venue? Venue { get; set; }
+            public Venue? Venue { get; set; }
 
-        [ForeignKey("EventId")]
+         [ForeignKey("EventId")]
         public Event? Event { get; set; }
     }
 }

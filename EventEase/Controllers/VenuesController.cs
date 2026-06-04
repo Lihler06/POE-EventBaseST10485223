@@ -12,13 +12,13 @@ namespace EventEase.Controllers
 {
     public class VenuesController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly BlobService _blobService;
+     private readonly ApplicationDbContext _context;
+         private readonly BlobService _blobService;
 
         public VenuesController(ApplicationDbContext context, BlobService blobService)
         {
-            _context = context;
-            _blobService = blobService;
+           _context = context;
+         _blobService = blobService;
         }
 
         // Getting venues for post
@@ -31,7 +31,7 @@ namespace EventEase.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-                return NotFound();
+            return NotFound();
 
             var venue = await _context.Venues
                 .FirstOrDefaultAsync(m => m.VenueId == id);
@@ -39,11 +39,11 @@ namespace EventEase.Controllers
             if (venue == null)
                 return NotFound();
 
-            return View(venue);
+         return View(venue);
         }
 
         // Get result for create
-        public IActionResult Create()
+           public IActionResult Create()
         {
             return View();
         }
@@ -55,16 +55,15 @@ namespace EventEase.Controllers
         {
             if (ModelState.IsValid)
             {
-                // 🖼 Upload image to Azurite
+                // Upload image to Azurite
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    var imageUrl = await _blobService
-                        .UploadFileAsync(imageFile, "venue-images");
+              venue.ImageUrl = "https://via.placeholder.com/300";
 
-                    venue.ImageUrl = imageUrl;
+                    
                 }
 
-                _context.Add(venue);
+            _context.Add(venue);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -93,14 +92,14 @@ namespace EventEase.Controllers
         public async Task<IActionResult> Edit(int id, Venue venue)
         {
             if (id != venue.VenueId)
-                return NotFound();
+             return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(venue);
-                    await _context.SaveChangesAsync();
+                  await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -152,16 +151,16 @@ namespace EventEase.Controllers
 
             if (venue != null)
             {
-                _context.Venues.Remove(venue);
-                await _context.SaveChangesAsync();
+             _context.Venues.Remove(venue);
+             await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction(nameof(Index));
+          return RedirectToAction(nameof(Index));
         }
 
-        private bool VenueExists(int id)
+           private bool VenueExists(int id)
         {
-            return _context.Venues.Any(e => e.VenueId == id);
+          return _context.Venues.Any(e => e.VenueId == id);
         }
     }
 }

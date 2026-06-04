@@ -10,58 +10,58 @@ namespace EventEase.Controllers
 {
     public class EventsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+       private readonly ApplicationDbContext _context;
 
-        public EventsController(ApplicationDbContext context)
+          public EventsController(ApplicationDbContext context)
         {
-            _context = context;
+          _context = context;
         }
 
         // Youre getting events
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Events.ToListAsync());
+          return View(await _context.Events.ToListAsync());
         }
 
         // Youre getting details
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+              if (id == null) return NotFound();
 
             var @event = await _context.Events
                 .FirstOrDefaultAsync(m => m.EventId == id);
 
             if (@event == null) return NotFound();
 
-            return View(@event);
+               return View(@event);
         }
 
         // get create
         public IActionResult Create()
         {
             ViewData["EventTypeId"] =
-                new SelectList(_context.EventTypes, "EventTypeId", "TypeName");
+          new SelectList(_context.EventTypes, "EventTypeId", "TypeName");
 
             return View();
         }
 
         // creating post
         [HttpPost]
-        [ValidateAntiForgeryToken]
+            [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("EventId,EventName,StartDate,EndDate,Description,ImageUrl,EventTypeId")] Event @event)
         {
             // Fixing navigation validation Issue
-            ModelState.Remove("EventType");
+              ModelState.Remove("EventType");
 
             if (ModelState.IsValid)
             {
                 _context.Add(@event);
-                await _context.SaveChangesAsync();
+             await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
             ViewData["EventTypeId"] =
-                new SelectList(_context.EventTypes, "EventTypeId", "TypeName", @event.EventTypeId);
+          new SelectList(_context.EventTypes, "EventTypeId", "TypeName", @event.EventTypeId);
 
             return View(@event);
         }
@@ -70,13 +70,12 @@ namespace EventEase.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
-            var @event = await _context.Events.FindAsync(id);
+           var @event = await _context.Events.FindAsync(id);
 
             if (@event == null) return NotFound();
 
             ViewData["EventTypeId"] =
-                new SelectList(_context.EventTypes, "EventTypeId", "TypeName", @event.EventTypeId);
+              new SelectList(_context.EventTypes, "EventTypeId", "TypeName", @event.EventTypeId);
 
             return View(@event);
         }
@@ -88,18 +87,18 @@ namespace EventEase.Controllers
         {
             if (id != @event.EventId) return NotFound();
 
-            ModelState.Remove("EventType");
+          ModelState.Remove("EventType");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(@event);
-                    await _context.SaveChangesAsync();
+                _context.Update(@event);
+                await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EventExists(@event.EventId))
+                      if (!EventExists(@event.EventId))
                         return NotFound();
                     else
                         throw;
